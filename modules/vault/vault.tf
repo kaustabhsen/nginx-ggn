@@ -11,16 +11,6 @@ resource "null_resource" "server" {
         agent = false
     }
 
-    provisioner "file" {
-            content = "${template_file.install.rendered}"
-            destination = "/tmp/install.sh"
-    }
-
-    provisioner "file" {
-            content = "${template_file.config.rendered}"
-            destination = "/tmp/config"
-    }
-
     provisioner "remote-exec" {
         inline = [
           "sudo tee /tmp/install.sh <<FOE",
