@@ -21,16 +21,12 @@ resource "null_resource" "server" {
             destination = "/tmp/config"
     }
 
-    provisioner "file" {
-            content = "${template_file.consul.rendered}"
-            destination = "/tmp/consul-install.sh"
-    }
-
     provisioner "remote-exec" {
         inline = [
-            "sudo chmod +x /tmp/install.sh && sudo chmod +x /tmp/consul-install.sh",
-            "sudo /tmp/install.sh",
-
+          "sudo tee /tmp/install.sh <<FOE",
+          "${template_file.install.rendered}",
+          "FOE",
+          "sudo chmod +x /tmp/install.sh && sh /tmp/install.sh",
         ]
     }
 }
