@@ -16,7 +16,7 @@ resource "null_resource" "server" {
           "sudo tee /tmp/install.sh <<FOE",
           "${template_file.install.rendered}",
           "FOE",
-          "sudo chmod +x /tmp/install.sh && sh /tmp/install.sh",
+          "sudo chmod +x /tmp/install.sh && sudo sh /tmp/install.sh",
         ]
     }
 }

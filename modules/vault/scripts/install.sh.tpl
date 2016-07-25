@@ -11,7 +11,7 @@ curl -L "${download-url}" > /tmp/vault.zip
 
 # Unzip it
 cd /tmp
-unzip vault.zip
+unzip -o vault.zip
 mv -f vault /usr/local/bin
 chmod 0755 /usr/local/bin/vault
 chown root:root /usr/local/bin/vault
@@ -25,7 +25,7 @@ mv -f statsd_exporter /usr/local/bin/statsd_exporter
 # Setup the configuration
 ### Need to get the IP of the host, and trim the trailing space
 MY_IP=`hostname -I | sed -e 's/[[:space:]]//'`
-VAULT_ADVERTISE_ADDR="$${MY_IP}:8200"
+VAULT_ADVERTISE_ADDR="\$${MY_IP}:8200"
 #VAULT_ADVERTISE_ADDR="${vault-address}"
 cat <<EOF >/tmp/vault-config
 ${config}
@@ -62,7 +62,7 @@ EOF
 mv -f /tmp/upstart /etc/init/vault.conf
 
 # Setup statsd init script
-cat <<EOF>>/tmp/upstart-statsd
+cat <<EOF >>/tmp/upstart-statsd
 description "Starting StatsD Exporter"
 
 start on started vault
@@ -91,7 +91,7 @@ EOF
 mv -f /tmp/upstart-statsd /etc/init/statsd.conf
 
 # Setup statsd registration init script
-cat > /tmp/statsd-exporter-reg << EOF
+cat <<EOF > /tmp/statsd-exporter-reg
 {
   "ID": "statsd_exporter:`uname -n`",
   "Name": "statsd_exporter",
@@ -103,7 +103,7 @@ cat > /tmp/statsd-exporter-reg << EOF
 }
 EOF
 
-cat <<EOF>>/tmp/upstart-statsd-register
+cat <<EOF >>/tmp/upstart-statsd-register
 description "Join StatsD Exporter with the consul cluster"
 
 start on started vault
@@ -122,11 +122,11 @@ script
   # Keep trying to join until it succeeds
   while :; do
     logger -t "statsd-exporter-register" "Attempting to register with Consul agent..."
-    response=\$(curl --silent --write-out "\n%{http_code}\n" -X PUT http://localhost:8500/v1/agent/service/register -d @/tmp/statsd-exporter-reg)
-    status_code=\$(echo "\$response" | sed -n '\$p')
+    response=\$$(curl --silent --write-out "\n%{http_code}\n" -X PUT http://localhost:8500/v1/agent/service/register -d @/tmp/statsd-exporter-reg)
+    status_code=\$$(echo "\$$response" | sed -n '\$$p')
     #  >>/var/log/statsd-exporter-consul-registration.log 2>&1
     logger -t "statsd-exporter-register" "Consul registration status: \$${status_code}"
-    [ \$status_code -eq 200 ] && break
+    [ \$$status_code -eq 200 ] && break
     sleep 5
   done
 
@@ -148,20 +148,20 @@ ${extra-install}
 # Start Vault
 start vault
 
-tmpfile=$( mktemp )
+tmpfile=\$$( mktemp )
 
-cat > $tmpfile << EOF
+cat <<EOF > \$$tmpfile
 {
     "ID": "vault:`uname -n`",
     "Name": "vault",
     "Port": 8200,
     "Check": {
-        "HTTP": "http://$${MY_IP}:8200/v1/sys/health?standbyok=true",
+        "HTTP": "http://\$${MY_IP}:8200/v1/sys/health?standbyok=true",
         "Interval": "15s"
     }
 }
 EOF
 
-curl -X PUT http://localhost:8500/v1/agent/service/register -d @$tmpfile
+curl -X PUT http://localhost:8500/v1/agent/service/register -d @\$$tmpfile
 
-rm -f $tmpfile
+rm -f \$$tmpfile
