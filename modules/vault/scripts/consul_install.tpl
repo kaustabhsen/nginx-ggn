@@ -16,10 +16,6 @@ mkdir -p /etc/consul.d
 mkdir -p /mnt/consul
 mkdir -p /etc/service
 
-# Get the public IP
-#BIND=`ifconfig eth0 | grep 'inet addr' | awk '{ print substr(\$2,6) }'`
-BIND=`ip addr sho eth0 | grep -Po 'inet \K[\d.]+'`
-
 # Setup the init script
 cat <<EOF >/tmp/consul_upstart
 description "Consul agent"
@@ -35,6 +31,10 @@ script
   if [ -f "/etc/service/consul" ]; then
     . /etc/service/consul
   fi
+
+  # Get the public IP
+  #BIND=`ifconfig eth0 | grep 'inet addr' | awk '{ print substr(\$2,6) }'`
+  BIND=`ip addr sho eth0 | grep -Po 'inet \K[\d.]+'`
 
   # Make sure to use all our CPUs, because Consul can block a scheduler thread
   export GOMAXPROCS=`nproc`
