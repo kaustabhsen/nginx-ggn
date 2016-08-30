@@ -2,6 +2,7 @@ backend "consul" {
     address = "127.0.0.1:8500"
     path = "vault"
     advertise_addr = "http://\$${VAULT_ADVERTISE_ADDR}"
+	scheme = "http"
 }
 
 listener "tcp" {
